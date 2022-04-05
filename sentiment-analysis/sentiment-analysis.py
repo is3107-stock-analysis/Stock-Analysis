@@ -1,5 +1,4 @@
 import pandas as pd
-import nltk
 import random
 #from finbert import FinBERT
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
