@@ -1,5 +1,9 @@
+/dag/__pycache__
+/dag/webscraper/__pycache__
+
 # Environments
 .env
 .venv
 env/
 venv/
+
