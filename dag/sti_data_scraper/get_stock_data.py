@@ -1,5 +1,3 @@
-import cvxpy as cvx
-import numpy as np
 import pandas as pd
 from pandas_datareader.data import DataReader
 from copy import deepcopy
@@ -14,7 +12,7 @@ from math import sqrt
 Get stocks data
 """
 
-def get_data_for_multiple_stocks(start_date, end_date):
+def get_data_for_multiple_stocks(ti, start_date, end_date):
     '''
     Obtain stocks information (Date, OHLC, Volume and Adjusted Close). 
     Uses Pandas DataReader to make an API Call to Yahoo Finance and download the data directly.
@@ -39,4 +37,10 @@ def get_data_for_multiple_stocks(start_date, end_date):
         stocks[ticker] = s[ticker]
         
     # skip first row that will be na, and fillna by 0 incase there are trading halts on specific days
-    print(stocks.iloc[1:].fillna(0))
+    stocks = stocks.iloc[1:].fillna(0)
+
+    ### Push into XCOM to test code
+    ti.xcom_push(key="stocks_returns_df", value=stocks.to_json())
+    
+    return stocks.to_json() 
+
