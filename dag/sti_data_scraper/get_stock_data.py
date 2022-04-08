@@ -22,8 +22,8 @@ def get_data_for_multiple_stocks(ti, start_date, end_date):
     Output: A dictionary of dataframes for each stock
     '''
 
-    # microsoft, goldman sachs, disney, macdonalds, johnsen and johnsen, gold
-    tickers = ["D05.SI", "U11.SI", "V03.SI", "A17U.SI", "9CI.SI"]
+    # TODO replace
+    tickers = ["D05.SI", "O39.SI","U11.SI","Z74.SI","J36.SI","C38U.SI","9CI.SI","A17U.SI","F34.SI","BN4.SI"]
     # read in stock data
     s = DataReader(tickers[0], 'yahoo', start_date, end_date)[["Adj Close"]]
     # get log returns
@@ -39,7 +39,7 @@ def get_data_for_multiple_stocks(ti, start_date, end_date):
     # skip first row that will be na, and fillna by 0 incase there are trading halts on specific days
     stocks = stocks.iloc[1:].fillna(0)
 
-    ### Push into XCOM to test code
+    ### Push into XCOM 
     ti.xcom_push(key="stocks_returns_df", value=stocks.to_json())
     
     return stocks.to_json() 
