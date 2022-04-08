@@ -1,9 +1,10 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from news_webscraper.web_scraper import NewsScraper
+from news_webscraper.NewsScraper import NewsScraper
 from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
 from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
+from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 
 def helloWorld():
     test = NewsScraper()
@@ -36,7 +37,7 @@ with DAG(dag_id="hello_world_dag",
 
 
         """
-        Load into daa warehouse
+        Load into dataa warehouse
         """
 
 
@@ -52,5 +53,12 @@ with DAG(dag_id="hello_world_dag",
         python_callable=get_optimized_portfolio, 
         op_kwargs={"returns_scale":0.0001}
         )
+
+        #Get the optimized portfolio statistics
+        get_comparison_statistics = PythonOperator(
+            task_id="get_statistics", 
+            python_callable=get_comparison_statistics
+        )
+
     
-task1>>get_stocks>>get_optimized_portfolio
+task1>>get_stocks>>get_optimized_portfolio>>get_comparison_statistics
