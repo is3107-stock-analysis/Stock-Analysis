@@ -1,3 +1,6 @@
+import snowflake.connector
+import logging
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
@@ -13,17 +16,34 @@ def helloWorld():
     print("newsscraper success")
     print("Hello World")
 
-"""
-Test query
-"""
-query1 = [
-"""select 1;""",
-"""show tables in database abcd_db;""",
-]
-def count1(**context):
-    dwh_hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
-    result = dwh_hook.get_first("select count(*) from abcd_db.public.test3")
-    logging.info("Number of rows in `abcd_db.public.test3`  - %s", result[0])
+# def query():
+#     conn = snowflake.connector.connect(
+#                     user="*******",
+#                     password="*******",
+#                     account="ts39829.ap-southeast-1",
+#                     warehouse="COMPUTE_WH",
+#                     database="IS3107_NEWS_DATA",
+#                     schema="TEST_SCHEMA"
+#                     )
+#     cur = conn.cursor()
+#     cur.execute("select * from test_article")
+#     query_id = cur.sfqid
+#     cur.get_results_from_sfqid(query_id)
+#     results = cur.fetchall()
+#     print(f'{results[0]}')
+
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+# create_insert_query = [
+#     """create table public.test_table (amount number);""",
+#     """insert into public.test_table values(1),(2),(3);""",
+# ]
+
+# def row_count(**context):
+#     dwh_hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
+#     result = dwh_hook.get_first("select count(*) from public.test_table")
+#     logging.info("Number of rows in `public.test_table`  - %s", result[0])
+
 
 with DAG(dag_id="hello_world_dag",
          start_date=datetime(2021,1,1),
@@ -38,9 +58,18 @@ with DAG(dag_id="hello_world_dag",
         task_id="hello_world",
         python_callable=helloWorld)
 
-        task2 = PythonOperator(
-        task_id="Test snowflake",
-        python_callable=count1)
+
+        # ## cursor method for querying data from snowflake
+        # task2 = PythonOperator(
+        #     task_id="snowflake_query",
+        #     python_callable=query
+        # )
+
+        # ## conn method in airflow
+        # task2 = SnowflakeOperator(
+        # task_id="snowflake_create_query",
+        # sql=create_insert_query,
+        # snowflake_conn_id="snowflake_conn")
 
         get_stocks = PythonOperator(
         task_id="scrape_stocks_data",
