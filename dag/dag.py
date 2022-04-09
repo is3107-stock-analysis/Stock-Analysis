@@ -1,6 +1,8 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+from airflow.contrib.hooks.snowflake_hook import SnowflakeHook
+from airflow.contrib.operators.snowflake_operator import SnowflakeOperator
 from news_webscraper.NewsScraper import NewsScraper
 from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
 from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
@@ -10,6 +12,18 @@ def helloWorld():
     test = NewsScraper()
     print("newsscraper success")
     print("Hello World")
+
+"""
+Test query
+"""
+query1 = [
+"""select 1;""",
+"""show tables in database abcd_db;""",
+]
+def count1(**context):
+    dwh_hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
+    result = dwh_hook.get_first("select count(*) from abcd_db.public.test3")
+    logging.info("Number of rows in `abcd_db.public.test3`  - %s", result[0])
 
 with DAG(dag_id="hello_world_dag",
          start_date=datetime(2021,1,1),
@@ -23,6 +37,10 @@ with DAG(dag_id="hello_world_dag",
         task1 = PythonOperator(
         task_id="hello_world",
         python_callable=helloWorld)
+
+        task2 = PythonOperator(
+        task_id="Test snowflake",
+        python_callable=count1)
 
         get_stocks = PythonOperator(
         task_id="scrape_stocks_data",
