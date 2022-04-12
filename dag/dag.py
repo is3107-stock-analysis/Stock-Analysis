@@ -14,6 +14,7 @@ from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
 from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sti_data_scraper.holdings_scraper import HoldingsScraper
+from etl.data_cleaning import DataCleaning
 
 
 load_dotenv()
@@ -31,13 +32,19 @@ def load_data(to_db, to_table):
 
         #probably should be a function tt scrapes the thing or smth...
         holdings = HoldingsScraper.scrape_holdings()[1]
+        print('holdings scraped')
         companies = []
         tickers = []
         for idx, rows in holdings.iterrows():
             companies.append(rows['company'])
-            tickers.append(rows['tickers'])
+            tickers.append(rows['ticker'])
 
         dataframe = NewsScraper.scrape_news(tickers, companies)
+        print('news df created')
+        print(dataframe.head())
+
+        dataframe = DataCleaning.start_clean(dataframe)
+        print('cleaned')
 
         insert_news(dataframe, to_table)
 
@@ -154,7 +161,7 @@ def insert_news(dataframe, to_table):
     curr = conn.cursor()
 
     for index,row in dataframe.iterrows():
-        TITLE = row['title']
+        TITLE = row['title_no_newline_ellipse']
         ARTICLE_DATE = row['date']
         LINK = row['link']
         COMPANY = row['company']
@@ -211,11 +218,11 @@ with DAG(dag_id="hello_world_dag",
             op_kwargs={"to_db":'news_data', "to_table":'NEWS_TABLE'}
         )
 
-        insert_results_data = PythonOperator(
-            task_id="insert_results", 
-            python_callable= load_data,
-            op_kwargs={"to_db":'results', "to_table":'REWEIGHTING'}
-        )
+        # insert_results_data = PythonOperator(
+        #     task_id="insert_results", 
+        #     python_callable= load_data,
+        #     op_kwargs={"to_db":'results', "to_table":'REWEIGHTING'}
+        # )
 
 
         """
@@ -241,4 +248,4 @@ with DAG(dag_id="hello_world_dag",
         )
 
     
-task1>>get_stocks>>insert_news_data>>insert_results_data>>get_optimized_portfolio>>get_comparison_statistics
+task1>>get_stocks>>insert_news_data>>get_optimized_portfolio>>get_comparison_statistics
