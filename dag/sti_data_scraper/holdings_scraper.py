@@ -26,7 +26,7 @@ class HoldingsScraper:
             true_weights.append(weight)
         top_10_weights = HoldingsScraper.calcReweight(true_weights)
         df1 =  pd.DataFrame({'company': companies, 'ticker': tickers, 'true_weights':true_weights, 'top_10_weights':top_10_weights})
-        df1.to_csv("fund_top_holdings.csv", index=False)
+        #df1.to_csv("fund_top_holdings.csv", index=False)
         
         indexTopHoldings = soup.find_all("div", class_="index-top-holdings")
         companies = []
@@ -44,7 +44,7 @@ class HoldingsScraper:
             true_weights.append(weight)
         top_10_weights = HoldingsScraper.calcReweight(true_weights)
         df2 =  pd.DataFrame({'company': companies, 'ticker': tickers, 'true_weights':true_weights, 'top_10_weights':top_10_weights})
-        df2.to_csv("index_top_holdings.csv", index=False)
+        #df2.to_csv("index_top_holdings.csv", index=False)
 
         return [df1, df2]
 
