@@ -26,6 +26,7 @@ def helloWorld():
     print("newsscraper success")
     print("Hello World")
 
+
 #query_table("IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE", "2022-01-01", "2022-03-31")
 def query_table(db, schema, table, start_date, stop_date):
     snowflake.connector.paramstyle= 'qmark'
