@@ -51,7 +51,6 @@ def query_table(db, schema, table, start_date, stop_date):
 
 
 
-
 def load_data(to_db, to_table):
     if to_db == 'news_data':
 
