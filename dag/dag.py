@@ -13,6 +13,7 @@ from news_webscraper.NewsScraper import NewsScraper
 from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
 from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
+from sti_data_scraper.holdings_scraper import HoldingsScraper
 
 
 load_dotenv()
@@ -29,14 +30,14 @@ def load_data(to_db, to_table):
     if to_db == 'news_data':
 
         #probably should be a function tt scrapes the thing or smth...
-        dataframe = pd.DataFrame({
-        'title': ['hello', 'world'],
-        'date': ['2022-01-31 00:00:00', '2022-02-03 00:00:00'],
-        'link': ['https:monka.com', 'www.yeetmus.com'],
-        'desc': ['very goood', 'very bad'],
-        'company': ['apple', 'pear'],
-        'ticker':['apl', 'pe']
-        })
+        holdings = HoldingsScraper.scrape_holdings()[1]
+        companies = []
+        tickers = []
+        for idx, rows in holdings.iterrows():
+            companies.append(rows['company'])
+            tickers.append(rows['tickers'])
+
+        dataframe = NewsScraper.scrape_news(tickers, companies)
 
         insert_news(dataframe, to_table)
 
@@ -69,8 +70,6 @@ def insert_stocks(dataframe, to_table):
             )
     
     curr = conn.cursor()
-
-
     
     if to_table == 'STOCKS_RETURN':
         #drop table first.
@@ -93,10 +92,9 @@ def insert_stocks(dataframe, to_table):
 
         #insert data
 
-
-
-    if to_table == 'PORTFOLIO_HOLDINGS':
+    elif to_table == 'PORTFOLIO_HOLDINGS':
         #confusion
+        print('hello')
 
     elif to_table == 'PORTFOLIO_STATISTICS':
 
@@ -110,8 +108,6 @@ def insert_stocks(dataframe, to_table):
             (PORTFOLIO, SHARPE, VOLATILITY)
             )
 
-
-        
     conn.close()
 
 
