@@ -26,6 +26,31 @@ def helloWorld():
     print("newsscraper success")
     print("Hello World")
 
+#query_table("IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE", "2022-01-01", "2022-03-31")
+def query_table(db, schema, table, start_date, stop_date):
+    snowflake.connector.paramstyle= 'qmark'
+
+    conn = snowflake.connector.connect(
+                    user=username,
+                    password=password,
+                    account="ts39829.ap-southeast-1",
+                    warehouse="COMPUTE_WH",
+                    database=db,
+                    schema=schema
+                    )
+
+    curr = conn.cursor()
+
+    sql_query = """SELECT * FROM {}.{} WHERE 
+    DATETIME >= {} and DATETIME <={}""".format(schema, table, start_date, stop_date)
+
+    result = curr.execute(sql_query)
+    df = pd.DataFrame.from_records(iter(result), columns=[x[0] for x in result.description])
+
+    return df
+
+
+
 
 def load_data(to_db, to_table):
     if to_db == 'news_data':

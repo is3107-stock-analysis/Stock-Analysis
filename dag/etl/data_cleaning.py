@@ -1,8 +1,9 @@
 class DataCleaning:
 
+    @staticmethod
     def start_clean(df_news):
         # Remove duplicates
-        df_news2 = removeDuplicates(df_news)
+        df_news2 = DataCleaning.removeDuplicates(df_news)
 
         # Remove newline
         df_news2['title_no_newline'] = df_news2['title'].apply(lambda x: x.strip())

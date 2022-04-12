@@ -44,7 +44,7 @@ class NewsScraper:
     googlenews.clear()
     googlenews.set_time_range(start, end)
     googlenews.search(company)
-    sleep(8)
+    sleep(12)
 
     r = googlenews.results()
     results = pd.DataFrame(r) 
