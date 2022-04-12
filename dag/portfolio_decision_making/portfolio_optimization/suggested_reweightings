@@ -1,0 +1,17 @@
+import numpy as np
+import pandas as pd
+
+
+#TODO add on the sentiments etc
+def suggested_reweightings(original_weights, optimized_weights):
+    """
+    Compares and outputs the recommended adjusted weights
+    """
+    reweighting = pd.DataFrame(columns = ["Ticker", "Adjustment"])
+    reweighting["Ticker"]=tickers
+    
+    for ticker in tickers:
+        reweighting.loc[reweighting["Ticker"]==ticker,"Adjustment"] = (original_weights[original_weights["ticker"]==ticker].weight) -optimized_df[ticker] 
+    return reweighting
+
+
