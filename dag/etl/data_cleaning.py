@@ -1,9 +1,6 @@
 class DataCleaning:
-    
-    def __init__(self):
-        pass
 
-    def start_clean(self, df_news):
+    def start_clean(df_news):
         # Remove duplicates
         df_news2 = removeDuplicates(df_news)
 
@@ -16,7 +13,7 @@ class DataCleaning:
         
         return df_news2
 
-    def removeDuplicates(self, news_data):
+    def removeDuplicates(news_data):
         no_dupes_df = news_data.sort_values('datetime').drop_duplicates(subset = ['title','link'], keep='last')
         no_dupes_df.reset_index()
         return no_dupes_df
