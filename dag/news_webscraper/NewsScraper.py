@@ -26,7 +26,7 @@ class NewsScraper:
 
     #quarter = str(date.today().year) + " Q" + str((date.today().month-1)//3 + 1)
 
-    df = pd.DataFrame(columns=['title', 'datetime', 'link', 'company', 'ticker'])
+    df = pd.DataFrame(columns=['TITLE', 'DATETIME', 'LINK', 'COMPANY', 'TICKER'])
     googlenews = GoogleNews()
     googlenews.set_lang('en')
 
@@ -48,9 +48,9 @@ class NewsScraper:
 
     r = googlenews.results()
     results = pd.DataFrame(r) 
-    results = results[['title', 'datetime', 'link']]
-    results['company'] = company
-    results['ticker'] = ticker
+    results = results[['TITLE', 'DATETIME', 'LINK']]
+    results['COMPANY'] = company
+    results['TICKER'] = ticker
     results.datetime.fillna(pd.to_datetime(start_d), inplace=True) #replace NA with the starting date
     df = pd.concat([df, results], ignore_index=True)
     
