@@ -11,6 +11,7 @@ from pandas_datareader.data import DataReader
 from scipy.stats import norm
 from math import sqrt
 from sql_helpers.sql_query import query_table
+from sql_helpers.sql_upload import insert_data
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -74,6 +75,8 @@ def get_data_for_multiple_stocks(ti):
     stocks_pivoted = df_table_converter(stocks)
     # TODO insert to db
 
+    insert_data(stocks_pivoted, "IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_RETURNS")
+
 
     ### Push into XCOM 
     ti.xcom_push(key="stocks_returns_df", value=stocks_pivoted.to_json())
@@ -87,11 +90,15 @@ def df_table_converter(df_stocks):
     date_cols = all_cols[0]
     ticker_columns = all_cols[1:]
 
+    start = df_stocks.first_valid_index()
+
     #[date, ticker, return]
     ticker_row_info =[]
+    print("df_stocks xd")
+    print(df_stocks.head())
 
 
-    for i in range(len(df_stocks.index)):
+    for i in range(start,start+len(df_stocks)):
         date = df_stocks.loc[i,date_cols]
         for ticker in ticker_columns:
             ticker_returns = df_stocks.loc[i,ticker]

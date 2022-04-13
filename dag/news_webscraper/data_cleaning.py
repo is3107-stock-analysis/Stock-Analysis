@@ -5,7 +5,7 @@ class DataCleaning:
         # Remove duplicates
         df_news2 = DataCleaning.removeDuplicates(df_news)
         # Remove trailing ellipse
-        df_news2['title_clean'] = df_news2['title'].replace('\.+','.',regex=True)
+        df_news2['title'] = df_news2['title'].replace('\.+','.',regex=True)
         # Reset the index due to the dropping of duplicates
         df_news2.reset_index()
         

@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 from time import sleep
 from sql_helpers.sql_query import query_table
+from data_cleaning import start_clean
 
 class NewsScraper:
 
@@ -51,7 +52,9 @@ class NewsScraper:
     #print(df.dtypes)
     #print(df.head())
 
-    insert_data(df, "IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE")
+    df_cleaned = start_clean(df)
+
+    insert_data(df_cleaned, "IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE")
 
   def get_company_news(googlenews, df, start_d, start, end, company, ticker):
     googlenews.clear()
