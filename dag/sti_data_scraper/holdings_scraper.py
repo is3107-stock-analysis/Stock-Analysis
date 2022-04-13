@@ -12,9 +12,6 @@ class HoldingsScraper:
         soup = BeautifulSoup(page.content, "html.parser")
 
         today = date.today()
-        m = today.month
-        q = (m-1)//3 + 1
-        quarter = str(today.year) + " Q" + str(q)
 
         indexTopHoldings = soup.find_all("div", class_="index-top-holdings")
         companies = []
@@ -32,7 +29,7 @@ class HoldingsScraper:
             true_weights.append(weight)
         top_10_weights = HoldingsScraper.calcReweight(true_weights)
         df =  pd.DataFrame({'company': companies, 'ticker': tickers, 'true_weights':true_weights, 'top_10_weights':top_10_weights})
-        df['quarter'] = quarter
+        df['date'] = today
         return df
 
     @staticmethod
