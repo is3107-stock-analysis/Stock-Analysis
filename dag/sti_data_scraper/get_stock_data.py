@@ -75,14 +75,6 @@ def get_data_for_multiple_stocks(ti):
 
 
     ### Push into XCOM 
-<<<<<<< HEAD
-    ti.xcom_push(key="stocks_returns_df", value=stocks.to_json())
-
-    ##huimin transform
-    ##upload function to table
-    
-    return stocks.to_json() 
-=======
     ti.xcom_push(key="stocks_returns_df", value=stocks_pivoted.to_json())
 
     def df_table_converter(df_stocks):
@@ -102,6 +94,5 @@ def get_data_for_multiple_stocks(ti):
 
         df_stocks_pivoted = pd.DataFrame(ticker_row_info, columns =['date', 'ticker', 'stock_returns'])
         return df_stocks_pivoted
->>>>>>> 88ed561c97523d1c38fcf47760e8a2fd8ab4b009
 
     return stocks.to_json() 

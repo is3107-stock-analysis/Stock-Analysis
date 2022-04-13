@@ -139,4 +139,4 @@ with DAG(dag_id="hello_world_dag",
         )
 
     
-insert_holdings>>get_stocks>>insert_news>>get_optimized_portfolio>>get_comparison_statistics
+insert_holdings>>get_stocks>>insert_news>>get_optimized_portfolio>>suggest_reweighting>>get_comparison_statistics
