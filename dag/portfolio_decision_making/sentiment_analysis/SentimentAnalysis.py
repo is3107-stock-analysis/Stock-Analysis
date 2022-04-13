@@ -1,10 +1,11 @@
 from numpy import positive
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from datetime import date
 
 class SentimentAnalysis:
 
-    def get_sentiments(companies, headlines_df):
+    def get_sentiments(ti, headlines_df):
         """
         Handles the sentiment analysis process
 
@@ -14,30 +15,26 @@ class SentimentAnalysis:
         headlines_df: dataframe of news headlines from these companies
         """
         model = SentimentAnalysis.get_vader()
-        sentiment_results = SentimentAnalysis.getPredictions(model, companies, headlines_df)
-        return sentiment_results
+        sentiment_predictions = SentimentAnalysis.getPredictions(model, headlines_df)
+        optimized_df = pd.read_json(ti.xcom_pull(key="optimized_weights", task_ids=["optimize_portfolio"])[0])
+
+        returns_df = pd.merge(sentiment_predictions, optimized_df, on='TICKER')
+
+        ### Push into XCOM 
+        #ti.xcom_push(key="decision_making_df", value=returns_df.to_json())
+
+        return returns_df.to_json() 
 
     def get_vader():
-        #finance_sentiments_df = pd.read_csv("LoughranMcDonald_MasterDictionary_2020.csv")
-        #finance_sentiments = finance_sentiments_df[['Word', 'Negative', 'Positive']]
-        
-        #negatives = finance_sentiments.loc[finance_sentiments['Negative'] > 0]['Word']
-        #positives =  finance_sentiments.loc[finance_sentiments['Positive'] > 0]['Word']
-        #neutrals = finance_sentiments.loc[(finance_sentiments['Positive'] <=0) & (finance_sentiments['Negative'] <=0)]['Word']
-
         sid = SentimentIntensityAnalyzer()
-        #sid_lex = sid.lexicon
-        #sid_lex.update({word:-2.0 for word in negatives})
-        #sid_lex.update({word:2.0 for word in positives})
-        #sid_lex.update({word:0 for word in neutrals})
-
         return sid
 
-    def getPredictions(model, companies, headlines_df):
+    def getPredictions(model, headlines_df):
         sentiment_pred = []
+        tickers = headlines_df['TICKER'].unique()
 
-        for company in companies:
-            df = headlines_df.loc[headlines_df['company'] == company]
+        for ticker in tickers:
+            df = headlines_df.loc[headlines_df['TICKER'] == ticker]
             headlines_arr = df['title']
             total_polarity = 0
             sentiment = 'neutral'
@@ -49,6 +46,8 @@ class SentimentAnalysis:
             elif total_polarity < -0.2:
                 sentiment = 'negative'
             sentiment_pred.append(sentiment)
-        print(sentiment_pred)
-        return pd.DataFrame({'company': companies, 'sentiment': sentiment_pred})
+        
+        df = pd.DataFrame({'TICKER': tickers, 'SENTIMENT': sentiment_pred})
+        df['DATE'] = str(date.today())
+        return df
 

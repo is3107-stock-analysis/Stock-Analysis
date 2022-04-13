@@ -1,8 +1,13 @@
+import sys, os
+sys.path.append(os.path.abspath(os.path.join('..', 'sql_helpers')))
+
 import numpy as np
 import pandas as pd
 import json
 
 from datetime import date
+from sql_helpers.sql_query import query_table
+
 
 def get_comparison_statistics(ti):
     """
@@ -12,7 +17,7 @@ def get_comparison_statistics(ti):
 
     # load weights from stock holdings
     stock_holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", "2022-01-01", "2022-03-31")
-    original_weights = list(stock_holdings.top10_weight)
+    original_weights = list(stock_holdings.TOP10_WEIGHT)
     optimized_weights = json.loads(ti.xcom_pull(key="optimized_weights", task_ids=["optimize_portfolio"])[0])
 
 
@@ -27,13 +32,13 @@ def get_comparison_statistics(ti):
     opt_sharpe = opt_portfolio_ret.mean(axis = 0) / opt_portfolio_ret.std(axis = 0) * 260 ** 0.5
 
     
-    stats = pd.DataFrame(columns=["Date", "Portfolio", "Sharpe", "Volatility")
-    date = str(date.today())
-    stats.loc[len(stats)] = [date, "STI", sti_sharpe, sti_vol]
-    stats.loc[len(stats)] = [date, "Optimized", opt_sharpe, opt_vol]
+    stats = pd.DataFrame(columns=["Date", "Portfolio", "Sharpe", "Volatility"])
+    today = str(date.today())
+    stats.loc[len(stats)] = [today, "STI", sti_sharpe, sti_vol]
+    stats.loc[len(stats)] = [today, "Optimized", opt_sharpe, opt_vol]
 
     # Save to xcoms to be combined with sentiment analysis output
-    ti.xcom_push(key="comparison_statistics", value=stats)
+    ti.xcom_push(key="comparison_statistics", value=stats.to_json())
 
     
 
