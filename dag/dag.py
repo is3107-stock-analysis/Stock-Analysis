@@ -13,6 +13,7 @@ from news_webscraper.NewsScraper import NewsScraper
 from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
 from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
+from portfolio_decision_making.portfolio_optimization.suggested_reweightings import suggested_reweightings
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
 from sql_helpers.sql_upload import insert_data

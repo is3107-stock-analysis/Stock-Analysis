@@ -31,7 +31,7 @@ class NewsScraper:
 
     #quarter = str(date.today().year) + " Q" + str((date.today().month-1)//3 + 1)
 
-    df = pd.DataFrame(columns=['TITLE', 'DATETIME', 'LINK', 'COMPANY', 'TICKER'])
+    df = pd.DataFrame(columns=['title', 'datetime', 'link', 'company', 'ticker'])
     googlenews = GoogleNews()
     googlenews.set_lang('en')
 
@@ -57,7 +57,7 @@ class NewsScraper:
     googlenews.clear()
     googlenews.set_time_range(start, end)
     googlenews.search(company)
-    sleep(12)
+    sleep(15)
 
     r = googlenews.results()
     results = pd.DataFrame(r) 
