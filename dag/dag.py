@@ -15,7 +15,7 @@ from portfolio_decision_making.portfolio_optimization.optimization import get_op
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
-from sql_upload import insert_news
+from sql_upload import insert_news, insert_holdings
 
 
 load_dotenv()
@@ -42,9 +42,9 @@ def load_data(to_db, to_table = ""):
     #     elif to_table == 'reweighting':
     #         insert_reweighting()
 
-    # elif to_db == 'stocks':
-    #     if to_table == 'holdings':
-    #         insert_holdings()
+    elif to_db == 'stocks':
+        if to_table == 'holdings':
+            insert_holdings()
         
     #     elif to_table == 'stocks':
     #         insert_stocks()
@@ -177,11 +177,18 @@ with DAG(dag_id="hello_world_dag",
         """
         Load into data warehouse
         """
-        insert_news_data = PythonOperator(
-            task_id="insert_news", 
-            python_callable= load_data,
-            op_kwargs={"to_db":'news_data'}
+        insert_holdings = PythonOperator(
+            task_id = "insert_holdings",
+            python_callable = load_data,
+            op_kwargs={"to_db":'stocks' , "to_table":'holdings'}
         )
+
+
+        # insert_news_data = PythonOperator(
+        #     task_id="insert_news", 
+        #     python_callable= load_data,
+        #     op_kwargs={"to_db":'news_data'}
+        # )
 
         # insert_results_data = PythonOperator(
         #     task_id="insert_results", 
@@ -213,4 +220,4 @@ with DAG(dag_id="hello_world_dag",
         )
 
     
-task1>>get_stocks>>insert_news_data>>get_optimized_portfolio>>get_comparison_statistics
+task1>>get_stocks>>insert_holdings>>get_optimized_portfolio>>get_comparison_statistics

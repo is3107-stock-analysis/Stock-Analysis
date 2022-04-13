@@ -16,6 +16,37 @@ from portfolio_decision_making.portfolio_optimization.comparison_statistics impo
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
 
+def insert_holdings():
+    dataframe = HoldingsScraper.scrape_holdings()
+    print('holdings scraped')
+
+    ## insert into holdings table
+    snowflake.connector.paramstyle= 'qmark'
+    conn = snowflake.connector.connect(
+                    user=username,
+                    password=password,
+                    account="ts39829.ap-southeast-1",
+                    warehouse="COMPUTE_WH",
+                    database="IS3107_STOCKS_DATA",
+                    schema="STOCKS_DATA"
+                    )
+
+    curr = conn.cursor()
+
+    for index,row in dataframe.iterrows():
+        COMPANY = row['company']
+        TICKER = row['ticker']
+        TRUE_WEIGHT = row['true_weights']
+        TOP10_WEIGHT = row['top_10_weights']
+        DATE_QUARTER = row['quarter']
+
+        curr.execute(
+        "INSERT INTO STOCKS_DATA.STOCKS_HOLDINGS VALUES (?, ?, ?, ?, ?)",
+        (COMPANY, TICKER, TRUE_WEIGHT, TOP10_WEIGHT, DATE_QUARTER)
+        )
+
+    conn.close()
+
 def insert_news():
     holdings = HoldingsScraper.scrape_holdings()[1]
     print('holdings scraped')
