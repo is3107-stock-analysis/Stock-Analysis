@@ -6,8 +6,9 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 from time import sleep
+
 from sql_helpers.sql_query import query_table
-from data_cleaning import start_clean
+from sql_helpers.sql_upload import insert_data
 
 class NewsScraper:
 
@@ -43,7 +44,8 @@ class NewsScraper:
     tickers = list(holdings.TICKER)
     print("tickers: " + str(tickers))
 
-    for i in range(len(companies)):
+    # for i in range(len(companies)):
+    for i in range(2):
       df = NewsScraper.get_company_news(googlenews, df, one_months_ago_d, one_months_ago, today, companies[i], tickers[i])
 
       df = NewsScraper.get_company_news(googlenews, df, two_months_ago_d, two_months_ago, one_months_ago_minus_one_day, companies[i], tickers[i])
@@ -52,7 +54,7 @@ class NewsScraper:
     #print(df.dtypes)
     #print(df.head())
 
-    df_cleaned = start_clean(df)
+    df_cleaned = NewsScraper.start_clean(df)
 
     insert_data(df_cleaned, "IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE")
 
@@ -73,3 +75,18 @@ class NewsScraper:
     googlenews.clear()
 
     return df
+
+  def start_clean(df_news):
+    # Remove duplicates
+    df_news2 = NewsScraper.removeDuplicates(df_news)
+    # Remove trailing ellipse
+    df_news2['title'] = df_news2['title'].replace('\.+','.',regex=True)
+    # Reset the index due to the dropping of duplicates
+    df_news2.reset_index()
+    
+    return df_news2
+
+  def removeDuplicates(news_data):
+      no_dupes_df = news_data.sort_values('datetime').drop_duplicates(subset = ['title','link'], keep='last')
+      no_dupes_df.reset_index()
+      return no_dupes_df

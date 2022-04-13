@@ -15,7 +15,6 @@ from portfolio_decision_making.portfolio_optimization.optimization import get_op
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from portfolio_decision_making.portfolio_optimization.suggested_reweightings import suggested_reweightings
 from sti_data_scraper.holdings_scraper import HoldingsScraper
-from etl.data_cleaning import DataCleaning
 from sql_helpers.sql_upload import insert_data
 from sql_helpers.sql_query import query_table
 
@@ -81,10 +80,10 @@ with DAG(dag_id="hello_world_dag",
         # )
 
 
-        # get_stocks = PythonOperator(
-        # task_id="scrape_stocks_data",
-        # python_callable=get_data_for_multiple_stocks
-        # )
+        get_stocks = PythonOperator(
+        task_id="scrape_stocks_data",
+        python_callable=get_data_for_multiple_stocks
+        )
 
         insert_news = PythonOperator(
             task_id = 'insert_news',
@@ -140,4 +139,4 @@ with DAG(dag_id="hello_world_dag",
         )
 
     
-insert_news>>get_optimized_portfolio>>get_adjustment>>get_comparison_statistics
+get_stocks>>insert_news>>get_optimized_portfolio>>get_adjustment>>get_comparison_statistics
