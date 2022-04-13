@@ -16,7 +16,7 @@ class SentimentAnalysis:
         """
         model = SentimentAnalysis.get_vader()
         sentiment_predictions = SentimentAnalysis.getPredictions(model, headlines_df)
-        optimized_df = pd.read_json(ti.xcom_pull(key="optimized_weights", task_ids=["optimize_portfolio"])[0])
+        optimized_df = pd.read_json(ti.xcom_pull(key="reweighting", task_ids=["suggest_reweight"])[0])
 
         returns_df = pd.merge(sentiment_predictions, optimized_df, on='TICKER')
 
