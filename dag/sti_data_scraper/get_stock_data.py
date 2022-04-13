@@ -44,21 +44,15 @@ def get_data_for_multiple_stocks(ti, start_date, end_date):
         
     # skip first row that will be na, and fillna by 0 incase there are trading halts on specific days
     stocks = stocks.iloc[1:].fillna(0)
-
-<<<<<<< HEAD
-
-=======
-    # TODO Add in date to this data
     # 1. Keep date
     # 2. Get all of the columns (as a list) and then we try and do the company col 
     # 3. index the df to get the stock_returns 
     stocks_pivoted = df_table_converter(stocks)
->>>>>>> affec33c8aab3f2594e90d35755c2a64b70f8794
+    # TODO insert to db
+
+
     ### Push into XCOM 
     ti.xcom_push(key="stocks_returns_df", value=stocks_pivoted.to_json())
-    
-    return stocks.to_json() 
-
 
     def df_table_converter(df_stocks):
         all_cols = df_stocks.columns
@@ -77,3 +71,5 @@ def get_data_for_multiple_stocks(ti, start_date, end_date):
 
         df_stocks_pivoted = pd.DataFrame(ticker_row_info, columns =['date', 'ticker', 'stock_returns'])
         return df_stocks_pivoted
+
+    return stocks.to_json() 
