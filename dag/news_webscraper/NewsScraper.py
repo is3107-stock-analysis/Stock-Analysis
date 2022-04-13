@@ -85,7 +85,7 @@ class NewsScraper:
     # Remove any open inverted commas 
     df_news['title'] = df_news['title'].replace('"','')
     # Remove any aprostrophe
-    df_news['title'] = df_news['title'].replace('\'','')
+    df_news['title'] = df_news['title'].replace("'",'')
     # Remove trailing ellipse
     df_news2['title'] = df_news2['title'].replace('\.+','.',regex=True)
     # Reset the index due to the dropping of duplicates
