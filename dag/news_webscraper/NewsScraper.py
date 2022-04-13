@@ -6,6 +6,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 from time import sleep
+import contractions
 
 from sql_helpers.sql_query import query_table
 from sql_helpers.sql_upload import insert_data
@@ -79,6 +80,12 @@ class NewsScraper:
   def start_clean(df_news):
     # Remove duplicates
     df_news2 = NewsScraper.removeDuplicates(df_news)
+    # Expand contractions
+    df_news['title'] = df_news['title'].apply(lambda x: contractions.fix(x))
+    # Remove any open inverted commas 
+    df_news['title'] = df_news['title'].replace('"','')
+    # Remove any aprostrophe
+    df_news['title'] = df_news['title'].replace('\'','')
     # Remove trailing ellipse
     df_news2['title'] = df_news2['title'].replace('\.+','.',regex=True)
     # Reset the index due to the dropping of duplicates
@@ -90,3 +97,4 @@ class NewsScraper:
       no_dupes_df = news_data.sort_values('datetime').drop_duplicates(subset = ['title','link'], keep='last')
       no_dupes_df.reset_index()
       return no_dupes_df
+
