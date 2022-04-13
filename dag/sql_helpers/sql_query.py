@@ -9,12 +9,6 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from airflow.contrib.hooks.snowflake_hook import SnowflakeHook
 from airflow.contrib.operators.snowflake_operator import SnowflakeOperator
-from news_webscraper.NewsScraper import NewsScraper
-from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
-from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
-from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
-from sti_data_scraper.holdings_scraper import HoldingsScraper
-from etl.data_cleaning import DataCleaning
 
 load_dotenv()
 username = os.getenv('USERNAME')

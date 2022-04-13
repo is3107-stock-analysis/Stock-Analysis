@@ -27,7 +27,7 @@ def get_comparison_statistics(ti):
     opt_sharpe = opt_portfolio_ret.mean(axis = 0) / opt_portfolio_ret.std(axis = 0) * 260 ** 0.5
 
     
-    stats = pd.DataFrame(columns=["Date", "Portfolio", "Sharpe", "Volatility")
+    stats = pd.DataFrame(columns=["Date", "Portfolio", "Sharpe", "Volatility"])
     date = str(date.today())
     stats.loc[len(stats)] = [date, "STI", sti_sharpe, sti_vol]
     stats.loc[len(stats)] = [date, "Optimized", opt_sharpe, opt_vol]

@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.abspath(os.path.join('..', 'sql_helpers')))
+
 import pandas as pd
 from pandas_datareader.data import DataReader
 from copy import deepcopy
@@ -7,6 +10,7 @@ import pandas as pd
 from pandas_datareader.data import DataReader
 from scipy.stats import norm
 from math import sqrt
+from sql_helpers.sql_query import query_table
 
 """
 Get stocks data
@@ -23,6 +27,8 @@ def get_data_for_multiple_stocks(ti, start_date, end_date):
     '''
 
     stock_holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", "2022-01-01", "2022-03-31")
+    print("query ran!")
+    print(stock_holdings.head())
     tickers = list(stock_holdings.Ticker)
     # read in stock data
     s = DataReader(tickers[0], 'yahoo', start_date, end_date)[["Adj Close"]]

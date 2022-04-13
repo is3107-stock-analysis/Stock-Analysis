@@ -15,8 +15,8 @@ from portfolio_decision_making.portfolio_optimization.optimization import get_op
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
-from sql_upload import insert_news, insert_holdings
-from sql_query import query_table
+from sql_helpers.sql_upload import insert_news, insert_holdings
+from sql_helpers.sql_query import query_table
 
 load_dotenv()
 username = os.getenv('USERNAME')
