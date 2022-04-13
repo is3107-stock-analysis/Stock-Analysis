@@ -15,25 +15,20 @@ from portfolio_decision_making.portfolio_optimization.optimization import get_op
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
-from sql_helpers.sql_upload import insert_news, insert_holdings
+from sql_helpers.sql_upload import insert_data
 from sql_helpers.sql_query import query_table
 
 load_dotenv()
 username = os.getenv('USERNAME')
 password = os.getenv('PASSWORD')
 
-def helloWorld():
-    test = NewsScraper()
-    print("newsscraper success")
-    print("Hello World")
-
 
 # def load_data(to_db, to_table = ""):
 #     if to_db == 'news_data':
 #         insert_news()
     
-#     elif to_db == 'results':
-#         insert_reweighting()
+# #     elif to_db == 'results':
+# #         insert_reweighting()
 
 #     elif to_db == 'stocks':
 #         if to_table == 'holdings':
@@ -45,11 +40,29 @@ def helloWorld():
 #         elif to_table == 'portfolio_statistics':
 #             insert_portfolio_statistics()
 
-def query_test():
-    df = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "PORTFOLIO_STATISTICS", '2022-01-01', '2022-03-31')
-    print(df.head())
+# def get_quarter_start_end(dt):
+#     year = str(dt.year)
+#     quarter = ((now.month-1)//3+1) - 1
 
-
+#     if quarter == 1:
+#         start_date = year+ '-01-01'
+#         end_date = year+ '-03-31'
+#         return (start_date, end_date)
+    
+#     elif quarter == 2:
+#         start_date = year+ '-04-01'
+#         end_date = year+ '-06-30'
+#         return (start_date, end_date)
+    
+#     elif quarter == 3:
+#         start_date = year+ '-07-01'
+#         end_date = year+ '-09-30'
+#         return (start_date, end_date)
+    
+#     elif quarter == 4:
+#         start_date = year+ '-10-01'
+#         end_date = year+ '-12-31'
+#         return (start_date, end_date)
 
 
 with DAG(dag_id="hello_world_dag",
@@ -60,16 +73,20 @@ with DAG(dag_id="hello_world_dag",
         """
         Scrape all required data
         """
-
-        task1 = PythonOperator(
-        task_id="hello_world",
-        python_callable=helloWorld)
+        insert_holdings = PythonOperator(
+            task_id = "insert_holdings",
+            python_callable = HoldingsScraper.scrape_holdings
+        )
 
 
         get_stocks = PythonOperator(
         task_id="scrape_stocks_data",
-        python_callable=get_data_for_multiple_stocks, 
-        op_kwargs={"start_date":"2022-01-01", "end_date":"2022-04-01"}
+        python_callable=get_data_for_multiple_stocks
+        )
+
+        insert_news = PythonOperator(
+            task_id = 'insert_news',
+            python_callable = NewsScraper.scrape_news
         )
 
         """
@@ -77,19 +94,10 @@ with DAG(dag_id="hello_world_dag",
         """
         ## NEED to do cleaning of stock/news data first, then push into DB
 
-        test_query = PythonOperator(
-            task_id = "test_query",
-            python_callable = query_test
-        )
-
         """
         Load into data warehouse
         """
-        # insert_holdings = PythonOperator(
-        #     task_id = "insert_holdings",
-        #     python_callable = load_data,
-        #     op_kwargs={"to_db":'stocks' , "to_table":'holdings'}
-        # )
+
 
 
         # insert_news_data = PythonOperator(
@@ -128,4 +136,4 @@ with DAG(dag_id="hello_world_dag",
         )
 
     
-task1>>get_stocks>>test_query>>get_optimized_portfolio>>get_comparison_statistics
+insert_holdings>>get_stocks>>insert_news>>get_optimized_portfolio>>get_comparison_statistics

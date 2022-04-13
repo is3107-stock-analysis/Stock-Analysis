@@ -1,7 +1,13 @@
+import sys, os
+sys.path.append(os.path.abspath(os.path.join('..', 'sql_helpers')))
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import date
+
+from sql_helpers.sql_upload import insert_data
+
 
 class HoldingsScraper:
 
@@ -30,7 +36,8 @@ class HoldingsScraper:
         top_10_weights = HoldingsScraper.calcReweight(true_weights)
         df =  pd.DataFrame({'COMPANY': companies, 'TICKER': tickers, 'TRUE_WEIGHT':true_weights, 'TOP_10_WEIGHT':top_10_weights})
         df['date'] = today
-        return df
+
+        insert_data(df, "IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS" )
 
     @staticmethod
     def calcReweight(true_weights):

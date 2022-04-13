@@ -10,21 +10,13 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from airflow.contrib.hooks.snowflake_hook import SnowflakeHook
 from airflow.contrib.operators.snowflake_operator import SnowflakeOperator
-from news_webscraper.NewsScraper import NewsScraper
-from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
-from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
-from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
-from sti_data_scraper.holdings_scraper import HoldingsScraper
-from etl.data_cleaning import DataCleaning
-from sql_helpers.sql_query import query_table
+
 
 load_dotenv()
 username = os.getenv('USERNAME')
 password = os.getenv('PASSWORD')
 
-def insert_holdings():
-    dataframe = HoldingsScraper.scrape_holdings()
-    print('holdings scraped')
+def insert_data(dataframe, db, schema, table):
 
     ## insert into holdings table
     snowflake.connector.paramstyle= 'qmark'
@@ -33,72 +25,109 @@ def insert_holdings():
                     password=password,
                     account="ts39829.ap-southeast-1",
                     warehouse="COMPUTE_WH",
-                    database="IS3107_STOCKS_DATA",
-                    schema="STOCKS_DATA"
+                    database=db,
+                    schema=schema
                     )
 
     curr = conn.cursor()
+    columns = dataframe.columns
+    col_len = len(columns)
 
     for index,row in dataframe.iterrows():
-        COMPANY = row['company']
-        TICKER = row['ticker']
-        TRUE_WEIGHT = row['true_weights']
-        TOP10_WEIGHT = row['top_10_weights']
-        DATE_QUARTER = row['quarter']
+        sql_query = "INSERT INTO {}.{} VALUES (".format(schema, table)
 
-        curr.execute(
-        "INSERT INTO STOCKS_DATA.STOCKS_HOLDINGS VALUES (?, ?, ?, ?, ?)",
-        (COMPANY, TICKER, TRUE_WEIGHT, TOP10_WEIGHT, DATE_QUARTER)
-        )
+        for i in range(col_len):
+            if isinstance(row[columns[i]], float):
+                sql_query +=  str(row[columns[i]]) + ", "
+            
+            else:
+                sql_query += "'"+ str(row[columns[i]]) + "', "
+                
+
+        sql_query = sql_query[:-2] + ')'
+        print(sql_query)
+
+        curr.execute(sql_query)
 
     conn.close()
 
-def insert_news():
+# def insert_holdings():
+#     dataframe = HoldingsScraper.scrape_holdings()
+#     print('holdings scraped')
+
+#     ## insert into holdings table
+#     snowflake.connector.paramstyle= 'qmark'
+#     conn = snowflake.connector.connect(
+#                     user=username,
+#                     password=password,
+#                     account="ts39829.ap-southeast-1",
+#                     warehouse="COMPUTE_WH",
+#                     database="IS3107_STOCKS_DATA",
+#                     schema="STOCKS_DATA"
+#                     )
+
+#     curr = conn.cursor()
+
+#     for index,row in dataframe.iterrows():
+#         COMPANY = row['company']
+#         TICKER = row['ticker']
+#         TRUE_WEIGHT = row['true_weights']
+#         TOP10_WEIGHT = row['top_10_weights']
+#         DATE_QUARTER = row['DATE']
+
+#         curr.execute(
+#         "INSERT INTO STOCKS_DATA.STOCK_HOLDINGS VALUES (?, ?, ?, ?, ?)",
+#         (COMPANY, TICKER, TRUE_WEIGHT, TOP10_WEIGHT, DATE_QUARTER)
+#         )
+
+#     conn.close()
+
+# def insert_news():
 
 
-    # Get current date-time.
-    now = datetime.now()
-    start_date, end_date = get_quarter_start_end(now)
-    holdings = query_table('IS3107_STOCKS_DATA', 'STOCKS_DATA', 'STOCKS_HOLDINGS', start_date, end_date) #query from the holdings table
+#     # Get current date-time.
+#     now = datetime.now()
+#     start_date, end_date = get_quarter_start_end(now)
+#     holdings = query_table('IS3107_STOCKS_DATA', 'STOCKS_DATA', 'STOCKS_HOLDINGS', start_date, end_date) #query from the holdings table
 
-    companies = []
-    tickers = []
-    for idx, rows in holdings.iterrows():
-        companies.append(rows['company'])
-        tickers.append(rows['ticker'])
+#     companies = []
+#     tickers = []
+#     for idx, rows in holdings.iterrows():
+#         companies.append(rows['company'])
+#         tickers.append(rows['ticker'])
 
-    dataframe = NewsScraper.scrape_news(tickers, companies)
-    print('news df created')
-    print(dataframe.head())
+#     dataframe = NewsScraper.scrape_news(tickers, companies)
+#     print('news df created')
+#     print(dataframe.head())
 
-    dataframe = DataCleaning.start_clean(dataframe)
-    print('cleaned')
+#     dataframe = DataCleaning.start_clean(dataframe)
+#     print('cleaned')
 
-    snowflake.connector.paramstyle= 'qmark'
-    conn = snowflake.connector.connect(
-                    user=username,
-                    password=password,
-                    account="ts39829.ap-southeast-1",
-                    warehouse="COMPUTE_WH",
-                    database="IS3107_NEWS_DATA",
-                    schema="NEWS_DATA"
-                    )
+#     snowflake.connector.paramstyle= 'qmark'
+#     conn = snowflake.connector.connect(
+#                     user=username,
+#                     password=password,
+#                     account="ts39829.ap-southeast-1",
+#                     warehouse="COMPUTE_WH",
+#                     database="IS3107_NEWS_DATA",
+#                     schema="NEWS_DATA"
+#                     )
 
-    curr = conn.cursor()
+#     curr = conn.cursor()
 
-    for index,row in dataframe.iterrows():
-        TITLE = row['title_no_newline_ellipse']
-        ARTICLE_DATE = row['date']
-        LINK = row['link']
-        COMPANY = row['company']
-        TICKER = row['ticker']
+#     for index,row in dataframe.iterrows():
+#         TITLE = row['title_no_newline_ellipse']
+#         ARTICLE_DATE = row['date']
+#         LINK = row['link']
+#         COMPANY = row['company']
+#         TICKER = row['ticker']
 
-        curr.execute(
-        "INSERT INTO NEWS_DATA.NEWS_TABLE VALUES (?, ?, ?, ?, ?)",
-        (TITLE, ARTICLE_DATE, LINK, COMPANY, TICKER)
-        )
+#         curr.execute(
+#         "INSERT INTO NEWS_DATA.NEWS_TABLE VALUES (?, ?, ?, ?, ?)",
+#         (TITLE, ARTICLE_DATE, LINK, COMPANY, TICKER)
+#         )
 
-    conn.close()
+#     conn.close()
 
 
 def get_quarter_start_end(dt):
