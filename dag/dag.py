@@ -15,6 +15,7 @@ from portfolio_decision_making.portfolio_optimization.optimization import get_op
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
+from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sql_upload import insert_news, insert_holdings
 
 
@@ -210,8 +211,10 @@ with DAG(dag_id="hello_world_dag",
         op_kwargs={"returns_scale":0.0001}
         )
 
-        ##load it into snowflake
-        #fucniton call
+        get_adjustment = PythonOperator(
+            task_id="suggest_reweight",
+            python_callable=suggested_reweightings
+        )
 
         #Get the optimized portfolio statistics
         get_comparison_statistics = PythonOperator(
