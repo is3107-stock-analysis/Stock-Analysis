@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -15,6 +16,7 @@ from portfolio_decision_making.portfolio_optimization.optimization import get_op
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
+from sql_query import query_table
 
 def insert_holdings():
     dataframe = HoldingsScraper.scrape_holdings()
@@ -48,8 +50,13 @@ def insert_holdings():
     conn.close()
 
 def insert_news():
-    holdings = HoldingsScraper.scrape_holdings()[1]
-    print('holdings scraped')
+
+
+    # Get current date-time.
+    now = datetime.now()
+    start_date, end_date = get_quarter_start_end(now)
+    holdings = query_table('IS3107_STOCKS_DATA', 'STOCKS_DATA', 'STOCKS_HOLDINGS', start_date, end_date) #query from the holdings table
+
     companies = []
     tickers = []
     for idx, rows in holdings.iterrows():
@@ -90,3 +97,27 @@ def insert_news():
     conn.close()
 
 
+def get_quarter_start_end(dt):
+    year = str(dt.year)
+    quarter = ((now.month-1)//3+1) - 1
+
+    if quarter == 1:
+        start_date = year+ '-01-01'
+        end_date = year+ '-03-31'
+        return start_date, end_date
+    
+    elif quarter == 2:
+        start_date = year+ '-04-01'
+        end_date = year+ '-06-30'
+        return start_date, end_date
+    
+    elif quarter == 3:
+        start_date = year+ '-07-01'
+        end_date = year+ '-09-30'
+        return start_date, end_date
+    
+    elif quarter == 4:
+        start_date = year+ '-10-01'
+        end_date = year+ '-12-31'
+        return start_date, end_date
+    
