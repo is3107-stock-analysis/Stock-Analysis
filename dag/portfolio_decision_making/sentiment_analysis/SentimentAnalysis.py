@@ -50,7 +50,7 @@ class SentimentAnalysis:
 
         for ticker in tickers:
             df = headlines_df.loc[headlines_df['TICKER'] == ticker]
-            headlines_arr = df['title']
+            headlines_arr = df['TITLE']
             total_polarity = 0
             sentiment = 'neutral'
             for h in headlines_arr:
@@ -63,5 +63,5 @@ class SentimentAnalysis:
             sentiment_pred.append(sentiment)
         
         df = pd.DataFrame({'TICKER': tickers, 'SENTIMENT': sentiment_pred})
-        return sentiment_pred
+        return df
 

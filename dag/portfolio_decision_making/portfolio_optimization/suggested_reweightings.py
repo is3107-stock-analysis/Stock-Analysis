@@ -17,11 +17,11 @@ def suggested_reweightings(ti):
     stock_holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", "2022-01-01", "2022-03-31")
     original_weights = list(stock_holdings.TOP10_WEIGHT)
     tickers = list(stock_holdings.TICKER)
-    reweighting = pd.DataFrame(columns = ["Ticker", "Adjustment"])
-    reweighting["Ticker"]= tickers
+    reweighting = pd.DataFrame(columns = ["TICKER", "Adjustment"])
+    reweighting["TICKER"]= tickers
     
     for ticker in tickers:
-        reweighting.loc[reweighting["Ticker"]==ticker,"Adjustment"] = (original_weights[original_weights["ticker"]==ticker].weight) -optimized_df[ticker] 
+        reweighting.loc[reweighting["TICKER"]==ticker,"Adjustment"] = (original_weights[original_weights["ticker"]==ticker].weight) -optimized_df[ticker] 
 
     ### Push into XCOM 
     ti.xcom_push(key="reweighting", value=reweighting.to_json())

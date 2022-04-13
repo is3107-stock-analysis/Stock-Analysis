@@ -14,7 +14,7 @@ from sti_data_scraper.get_stock_data import get_data_for_multiple_stocks
 from portfolio_decision_making.portfolio_optimization.optimization import get_optimized_portfolio
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from portfolio_decision_making.portfolio_optimization.suggested_reweightings import suggested_reweightings
-# from portfolio_decision_making.sentiment_analysis import SentimentAnalysis
+from portfolio_decision_making.sentiment_analysis.SentimentAnalysis import SentimentAnalysis
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from sql_helpers.sql_upload import insert_data
 from sql_helpers.sql_query import query_table
@@ -32,10 +32,10 @@ with DAG(dag_id="hello_world_dag",
         """
         Scrape & Load all required data
         """
-        insert_holdings = PythonOperator(
-            task_id = "insert_holdings",
-            python_callable = HoldingsScraper.scrape_holdings
-        )
+        # insert_holdings = PythonOperator(
+        #     task_id = "insert_holdings",
+        #     python_callable = HoldingsScraper.scrape_holdings
+        # )
 
 
         get_stocks = PythonOperator(
@@ -65,10 +65,10 @@ with DAG(dag_id="hello_world_dag",
         )
 
         ##SA
-        # sentiment_analysis = PythonOperator(
-        #     task_id = "sentiment_analysis",
-        #     python_callable=SentimentAnalysis.get_sentiments
-        # )
+        sentiment_analysis = PythonOperator(
+            task_id = "sentiment_analysis",
+            python_callable=SentimentAnalysis.get_sentiments
+        )
 
         #Get the optimized portfolio statistics
         get_comparison_statistics = PythonOperator(
@@ -78,4 +78,4 @@ with DAG(dag_id="hello_world_dag",
 
 
 
-insert_holdings>>get_stocks>>get_optimized_portfolio>>get_adjustment>>get_comparison_statistics
+get_stocks>>get_optimized_portfolio>>get_adjustment>>sentiment_analysis>>get_comparison_statistics
