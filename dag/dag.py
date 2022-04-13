@@ -15,6 +15,7 @@ from portfolio_decision_making.portfolio_optimization.optimization import get_op
 from portfolio_decision_making.portfolio_optimization.comparison_statistics import get_comparison_statistics
 from sti_data_scraper.holdings_scraper import HoldingsScraper
 from etl.data_cleaning import DataCleaning
+from sql_upload import insert_news
 
 
 load_dotenv()
@@ -27,177 +28,116 @@ def helloWorld():
     print("Hello World")
 
 
-#query_table("IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE", "2022-01-01", "2022-03-31")
-def query_table(db, schema, table, start_date, stop_date):
-    snowflake.connector.paramstyle= 'qmark'
-
-    conn = snowflake.connector.connect(
-                    user=username,
-                    password=password,
-                    account="ts39829.ap-southeast-1",
-                    warehouse="COMPUTE_WH",
-                    database=db,
-                    schema=schema
-                    )
-
-    curr = conn.cursor()
-
-    sql_query = """SELECT * FROM {}.{} WHERE 
-    DATETIME >= {} and DATETIME <={}""".format(schema, table, start_date, stop_date)
-
-    result = curr.execute(sql_query)
-    df = pd.DataFrame.from_records(iter(result), columns=[x[0] for x in result.description])
-
-    return df
-
-
-
-def load_data(to_db, to_table):
+def load_data(to_db, to_table = ""):
     if to_db == 'news_data':
-
-        #probably should be a function tt scrapes the thing or smth...
-        holdings = HoldingsScraper.scrape_holdings()[1]
-        print('holdings scraped')
-        companies = []
-        tickers = []
-        for idx, rows in holdings.iterrows():
-            companies.append(rows['company'])
-            tickers.append(rows['ticker'])
-
-        dataframe = NewsScraper.scrape_news(tickers, companies)
-        print('news df created')
-        print(dataframe.head())
-
-        dataframe = DataCleaning.start_clean(dataframe)
-        print('cleaned')
-
-        insert_news(dataframe, to_table)
-
-    elif to_db == 'results':
-
-        #probably should be a function tt scrapes the thing or smth...
-        dataframe = pd.DataFrame({
-        'ticker':['apl', 'pe'],
-        'optimal_weight': [0.6, 0.4],
-        'adjustment': [0.1, -0.1],
-        'sentiment': ['good', 'bad'],
-        })
-
-        insert_results(dataframe, to_table)
-
-    elif to_db == 'stocks_data':
-
-        insert_stocks(df, to_table)
-
-def insert_stocks(dataframe, to_table):
-    snowflake.connector.paramstyle= 'qmark'
-
-    conn = snowflake.connector.connect(
-            user=username,
-            password=password,
-            account="ts39829.ap-southeast-1",
-            warehouse="COMPUTE_WH",
-            database="IS3107_STOCKS_DATA",
-            schema="STOCKS_DATA"
-            )
+        insert_news()
     
-    curr = conn.cursor()
+    # elif to_db == 'results':
+    #     if to_table == 'sentiment':
+    #         insert_sentiment()
+
+    #     elif to_table == 'weight_optimizer':
+    #         insert_model()
+
+    #     elif to_table == 'reweighting':
+    #         insert_reweighting()
+
+    # elif to_db == 'stocks':
+    #     if to_table == 'holdings':
+    #         insert_holdings()
+        
+    #     elif to_table == 'stocks':
+    #         insert_stocks()
+
+# def load_data(to_db, to_table):
+#     if to_db == 'news_data':
+
+#         #probably should be a function tt scrapes the thing or smth...
+#         holdings = HoldingsScraper.scrape_holdings()[1]
+#         print('holdings scraped')
+#         companies = []
+#         tickers = []
+#         for idx, rows in holdings.iterrows():
+#             companies.append(rows['company'])
+#             tickers.append(rows['ticker'])
+
+#         dataframe = NewsScraper.scrape_news(tickers, companies)
+#         print('news df created')
+#         print(dataframe.head())
+
+#         dataframe = DataCleaning.start_clean(dataframe)
+#         print('cleaned')
+
+#         insert_news(dataframe, to_table)
+
+#     elif to_db == 'results':
+
+#         #probably should be a function tt scrapes the thing or smth...
+#         dataframe = pd.DataFrame({
+#         'ticker':['apl', 'pe'],
+#         'optimal_weight': [0.6, 0.4],
+#         'adjustment': [0.1, -0.1],
+#         'sentiment': ['good', 'bad'],
+#         })
+
+#         insert_results(dataframe, to_table)
+
+#     elif to_db == 'stocks_data':
+
+#         insert_stocks(df, to_table)
+
+# def insert_stocks(dataframe, to_table):
+#     snowflake.connector.paramstyle= 'qmark'
+
+#     conn = snowflake.connector.connect(
+#             user=username,
+#             password=password,
+#             account="ts39829.ap-southeast-1",
+#             warehouse="COMPUTE_WH",
+#             database="IS3107_STOCKS_DATA",
+#             schema="STOCKS_DATA"
+#             )
     
-    if to_table == 'STOCKS_RETURN':
-        #drop table first.
-        curr.execute(
-            "DROP TABLE IF EXISTS STOCKS_DATA.STOCKS_RETURN"
-        )
-
-        #extract column names
-        column_names = list(dataframe.columns)
-
-        #create table with column names
-        create_query = "CREATE OR REPLACE TABLE STOCKS_DATA.STOCKS (DATE DATE, "
-
-        for i in range(len(column_names)):
-            create_query += str(column_names)[i] 
-            create_query += " DOUBLE, "
-        create_query += ')'
-
-        curr.execute(create_query)
-
-        #insert data
-
-    elif to_table == 'PORTFOLIO_HOLDINGS':
-        #confusion
-        print('hello')
-
-    elif to_table == 'PORTFOLIO_STATISTICS':
-
-        for index,row in dataframe.iterrows():
-            PORTFOLIO = row['ticker']
-            SHARPE = row['optimal_weight']
-            VOLATILITY = row['adjustment']
-
-            curr.execute(
-            "INSERT INTO STOCKS_DATA." + to_table + " VALUES (?, ?, ?)",
-            (PORTFOLIO, SHARPE, VOLATILITY)
-            )
-
-    conn.close()
-
-
-
-def insert_results(dataframe, to_table):
-    snowflake.connector.paramstyle= 'qmark'
-
-    conn = snowflake.connector.connect(
-                    user=username,
-                    password=password,
-                    account="ts39829.ap-southeast-1",
-                    warehouse="COMPUTE_WH",
-                    database="IS3107_RESULTS",
-                    schema="FINAL_OUTPUT"
-                    )
-
-    curr = conn.cursor()
-
-    for index,row in dataframe.iterrows():
-        TICKER = row['ticker']
-        OP_WEIGHT = row['optimal_weight']
-        ADJ = row['adjustment']
-        SENTIMENT = row['sentiment']
-
-        curr.execute(
-        "INSERT INTO FINAL_OUTPUT." + to_table + " VALUES (?, ?, ?, ?)",
-        (TICKER, OP_WEIGHT, ADJ, SENTIMENT)
-        )
+#     curr = conn.cursor()
     
-    conn.close()
+#     if to_table == 'STOCKS_RETURN':
+#         #drop table first.
+#         curr.execute(
+#             "DROP TABLE IF EXISTS STOCKS_DATA.STOCKS_RETURN"
+#         )
 
-def insert_news(dataframe, to_table):
-    snowflake.connector.paramstyle= 'qmark'
+#         #extract column names
+#         column_names = list(dataframe.columns)
 
-    conn = snowflake.connector.connect(
-                    user=username,
-                    password=password,
-                    account="ts39829.ap-southeast-1",
-                    warehouse="COMPUTE_WH",
-                    database="IS3107_NEWS_DATA",
-                    schema="NEWS_DATA"
-                    )
+#         #create table with column names
+#         create_query = "CREATE OR REPLACE TABLE STOCKS_DATA.STOCKS (DATE DATE, "
 
-    curr = conn.cursor()
+#         for i in range(len(column_names)):
+#             create_query += str(column_names)[i] 
+#             create_query += " DOUBLE, "
+#         create_query += ')'
 
-    for index,row in dataframe.iterrows():
-        TITLE = row['title_no_newline_ellipse']
-        ARTICLE_DATE = row['date']
-        LINK = row['link']
-        COMPANY = row['company']
-        TICKER = row['ticker']
+#         curr.execute(create_query)
 
-        curr.execute(
-        "INSERT INTO NEWS_DATA." + to_table + " VALUES (?, ?, ?, ?, ?)",
-        (TITLE, ARTICLE_DATE, LINK, COMPANY, TICKER)
-        )
+#         #insert data
 
-    conn.close()
+#     elif to_table == 'PORTFOLIO_HOLDINGS':
+#         #confusion
+#         print('hello')
+
+#     elif to_table == 'PORTFOLIO_STATISTICS':
+
+#         for index,row in dataframe.iterrows():
+#             PORTFOLIO = row['ticker']
+#             SHARPE = row['optimal_weight']
+#             VOLATILITY = row['adjustment']
+
+#             curr.execute(
+#             "INSERT INTO STOCKS_DATA." + to_table + " VALUES (?, ?, ?)",
+#             (PORTFOLIO, SHARPE, VOLATILITY)
+#             )
+
+#     conn.close()
 
 
 # logging.basicConfig(level=logging.INFO)
@@ -240,7 +180,7 @@ with DAG(dag_id="hello_world_dag",
         insert_news_data = PythonOperator(
             task_id="insert_news", 
             python_callable= load_data,
-            op_kwargs={"to_db":'news_data', "to_table":'NEWS_TABLE'}
+            op_kwargs={"to_db":'news_data'}
         )
 
         # insert_results_data = PythonOperator(
