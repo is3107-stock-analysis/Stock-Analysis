@@ -5,7 +5,7 @@ from datetime import date
 
 class SentimentAnalysis:
 
-    def get_sentiments(headlines_df):
+    def get_sentiments(ti, headlines_df):
         """
         Handles the sentiment analysis process
 
@@ -16,7 +16,14 @@ class SentimentAnalysis:
         """
         model = SentimentAnalysis.get_vader()
         sentiment_predictions = SentimentAnalysis.getPredictions(model, headlines_df)
-        return sentiment_predictions
+        optimized_df = pd.read_json(ti.xcom_pull(key="optimized_weights", task_ids=["optimize_portfolio"])[0])
+
+        returns_df = pd.merge(sentiment_predictions, optimized_df, on='TICKER')
+
+        ### Push into XCOM 
+        #ti.xcom_push(key="decision_making_df", value=returns_df.to_json())
+
+        return returns_df.to_json() 
 
     def get_vader():
         sid = SentimentIntensityAnalyzer()
