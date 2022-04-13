@@ -1,11 +1,17 @@
-from numpy import positive
+import sys, os
+sys.path.append(os.path.abspath(os.path.join('..', 'sql_helpers')))
+
+from sql_helpers.sql_query import query_table
+from sql_helpers.sql_upload import insert_data
+
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from datetime import date
+from dateutil.relativedelta import relativedelta
 
 class SentimentAnalysis:
 
-    def get_sentiments(ti, headlines_df):
+    def get_sentiments(ti):
         """
         Handles the sentiment analysis process
 
@@ -14,20 +20,29 @@ class SentimentAnalysis:
         companies: array of companies to be analysed
         headlines_df: dataframe of news headlines from these companies
         """
-        model = SentimentAnalysis.get_vader()
+        today = date.today()
+        three_months_ago_d = date.today() + relativedelta(months=-3)
+        headlines_df = query_table("", "", "", three_months_ago_d, today)
+
+        model = SentimentIntensityAnalyzer()
         sentiment_predictions = SentimentAnalysis.getPredictions(model, headlines_df)
         optimized_df = pd.read_json(ti.xcom_pull(key="reweighting", task_ids=["suggest_reweight"])[0])
 
-        returns_df = pd.merge(sentiment_predictions, optimized_df, on='TICKER')
+        final_results_df = pd.merge(sentiment_predictions, optimized_df, on='TICKER')
 
-        ### Push into XCOM 
-        #ti.xcom_push(key="decision_making_df", value=returns_df.to_json())
+        #add concordance column
+        concordance = []
+        for index, row in final_results_df.iterrows():
+            if row['REWEIGHTING'] > 0 and row['SENTIMENT'] == "negative":
+                concordance.append(False)
+            elif row['REWEIGHTING'] < 0 and row['SENTIMENT'] == "positive":
+                concordance.append(False)
+            else:
+                concordance.append(True)
+        final_results_df['CONCORDANCE'] = concordance
+        final_results_df['DATE'] = str(date.today())
+        insert_data(final_results_df, "IS3107_RESULTS", "FINAL_OUTPUT", "REWEIGHTING")
 
-        return returns_df.to_json() 
-
-    def get_vader():
-        sid = SentimentIntensityAnalyzer()
-        return sid
 
     def getPredictions(model, headlines_df):
         sentiment_pred = []
@@ -48,6 +63,5 @@ class SentimentAnalysis:
             sentiment_pred.append(sentiment)
         
         df = pd.DataFrame({'TICKER': tickers, 'SENTIMENT': sentiment_pred})
-        df['DATE'] = str(date.today())
-        return df
+        return sentiment_pred
 
