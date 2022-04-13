@@ -22,13 +22,13 @@ class SentimentAnalysis:
         """
         today = date.today()
         three_months_ago_d = date.today() + relativedelta(months=-3)
-        headlines_df = query_table("", "", "", three_months_ago_d, today)
+        headlines_df = query_table("IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE", three_months_ago_d, today)
 
         model = SentimentIntensityAnalyzer()
         sentiment_predictions = SentimentAnalysis.getPredictions(model, headlines_df)
         optimized_df = pd.read_json(ti.xcom_pull(key="reweighting", task_ids=["suggest_reweight"])[0])
 
-        final_results_df = pd.merge(sentiment_predictions, optimized_df, on='TICKER')
+        final_results_df = pd.merge(optimized_df, sentiment_predictions, on='TICKER')
 
         #add concordance column
         concordance = []

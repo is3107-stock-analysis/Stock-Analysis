@@ -35,7 +35,6 @@ def query_table(db, schema, table, start_date, stop_date):
     print(sql_query)
 
     result = curr.execute(sql_query)
-    print("it ran!")
     df = pd.DataFrame.from_records(iter(result), columns=[x[0] for x in result.description])
 
     return df
