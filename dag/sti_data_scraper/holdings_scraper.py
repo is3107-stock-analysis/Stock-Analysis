@@ -28,7 +28,7 @@ class HoldingsScraper:
             weight = round(float(w.get_text()[:-1])/100, 4)
             true_weights.append(weight)
         top_10_weights = HoldingsScraper.calcReweight(true_weights)
-        df =  pd.DataFrame({'company': companies, 'ticker': tickers, 'true_weights':true_weights, 'top_10_weights':top_10_weights})
+        df =  pd.DataFrame({'COMPANY': companies, 'TICKER': tickers, 'TRUE_WEIGHT':true_weights, 'TOP_10_WEIGHT':top_10_weights})
         df['date'] = today
         return df
 
