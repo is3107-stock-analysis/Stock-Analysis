@@ -70,6 +70,7 @@ def get_data_for_multiple_stocks(ti):
     # 1. Keep date
     # 2. Get all of the columns (as a list) and then we try and do the company col 
     # 3. index the df to get the stock_returns 
+
     stocks_pivoted = df_table_converter(stocks)
     # TODO insert to db
 
@@ -77,22 +78,24 @@ def get_data_for_multiple_stocks(ti):
     ### Push into XCOM 
     ti.xcom_push(key="stocks_returns_df", value=stocks_pivoted.to_json())
 
-    def df_table_converter(df_stocks):
-        all_cols = df_stocks.columns
-        date_cols = all_cols[0]
-        ticker_columns = all_cols[1:]
 
-        #[date, ticker, return]
-        ticker_row_info =[]
-
-
-        for i in range(len(df_stocks.index)):
-            date = df_stocks.loc[i,date_cols]
-            for ticker in ticker_columns:
-                ticker_returns = df_stocks.loc[i,ticker]
-                ticker_row_info.append([date, ticker, ticker_returns])
-
-        df_stocks_pivoted = pd.DataFrame(ticker_row_info, columns =['date', 'ticker', 'stock_returns'])
-        return df_stocks_pivoted
 
     return stocks.to_json() 
+
+def df_table_converter(df_stocks):
+    all_cols = df_stocks.columns
+    date_cols = all_cols[0]
+    ticker_columns = all_cols[1:]
+
+    #[date, ticker, return]
+    ticker_row_info =[]
+
+
+    for i in range(len(df_stocks.index)):
+        date = df_stocks.loc[i,date_cols]
+        for ticker in ticker_columns:
+            ticker_returns = df_stocks.loc[i,ticker]
+            ticker_row_info.append([date, ticker, ticker_returns])
+
+    df_stocks_pivoted = pd.DataFrame(ticker_row_info, columns =['date', 'ticker', 'stock_returns'])
+    return df_stocks_pivoted
