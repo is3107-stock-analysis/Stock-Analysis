@@ -26,9 +26,14 @@ class SentimentAnalysis:
 
         model = SentimentIntensityAnalyzer()
         sentiment_predictions = SentimentAnalysis.getPredictions(model, headlines_df)
-        optimized_df = pd.read_json(ti.xcom_pull(key="reweighting", task_ids=["suggest_reweight"])[0])
+        print('sentimentpred')
+        print(sentiment_predictions)
 
-        final_results_df = pd.merge(optimized_df, sentiment_predictions, on='TICKER')
+        optimized_df = pd.read_json(ti.xcom_pull(key="reweighting", task_ids=["suggest_reweight"])[0])
+        print('optimized df')
+        print(optimized_df)
+
+        final_results_df = pd.merge(optimized_df, sentiment_predictions, on='Ticker')
 
         #add concordance column
         concordance = []
@@ -42,6 +47,8 @@ class SentimentAnalysis:
         final_results_df['CONCORDANCE'] = concordance
         final_results_df['DATE'] = str(date.today())
         insert_data(final_results_df, "IS3107_RESULTS", "FINAL_OUTPUT", "REWEIGHTING")
+        print('final results df')
+        print(final_results_df)
 
 
     def getPredictions(model, headlines_df):
@@ -62,6 +69,6 @@ class SentimentAnalysis:
                 sentiment = 'negative'
             sentiment_pred.append(sentiment)
         
-        df = pd.DataFrame({'TICKER': tickers, 'SENTIMENT': sentiment_pred})
+        df = pd.DataFrame({'Ticker': tickers, 'SENTIMENT': sentiment_pred})
         return df
 

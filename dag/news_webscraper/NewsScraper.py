@@ -77,21 +77,26 @@ class NewsScraper:
 
     return df
 
-  def start_clean(df_news):
+  def start_clean(input_df_news):
     # Remove duplicates
-    df_news2 = NewsScraper.removeDuplicates(df_news)
+    df_news = NewsScraper.removeDuplicates(input_df_news)
+
     # Expand contractions
     df_news['title'] = df_news['title'].apply(lambda x: contractions.fix(x))
+
     # Remove any open inverted commas 
     df_news['title'] = df_news['title'].replace('"','')
+
     # Remove any aprostrophe
     df_news['title'] = df_news['title'].replace("'",'')
+
     # Remove trailing ellipse
-    df_news2['title'] = df_news2['title'].replace('\.+','.',regex=True)
-    # Reset the index due to the dropping of duplicates
-    df_news2.reset_index()
+    df_news['title'] = df_news['title'].replace('\.+','.',regex=True)
     
-    return df_news2
+    # Reset the index due to the dropping of duplicates
+    df_news.reset_index()
+    
+    return df_news
 
   def removeDuplicates(news_data):
       no_dupes_df = news_data.sort_values('datetime').drop_duplicates(subset = ['title','link'], keep='last')
