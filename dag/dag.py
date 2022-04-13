@@ -32,10 +32,10 @@ with DAG(dag_id="hello_world_dag",
         """
         Scrape & Load all required data
         """
-        # insert_holdings = PythonOperator(
-        #     task_id = "insert_holdings",
-        #     python_callable = HoldingsScraper.scrape_holdings
-        # )
+        insert_holdings = PythonOperator(
+            task_id = "insert_holdings",
+            python_callable = HoldingsScraper.scrape_holdings
+        )
 
 
         get_stocks = PythonOperator(
@@ -78,4 +78,4 @@ with DAG(dag_id="hello_world_dag",
 
 
 
-get_stocks>>get_optimized_portfolio>>get_adjustment>>get_comparison_statistics
+insert_holdings>>get_stocks>>get_optimized_portfolio>>get_adjustment>>get_comparison_statistics
