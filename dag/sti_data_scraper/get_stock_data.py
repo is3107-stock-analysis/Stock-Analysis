@@ -29,7 +29,7 @@ def get_data_for_multiple_stocks(ti, start_date, end_date):
     stock_holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", "2022-01-01", "2022-03-31")
     print("query ran!")
     print(stock_holdings.head())
-    tickers = list(stock_holdings.Ticker)
+    tickers = list(stock_holdings.TICKER)
     # read in stock data
     s = DataReader(tickers[0], 'yahoo', start_date, end_date)[["Adj Close"]]
     # get log returns
