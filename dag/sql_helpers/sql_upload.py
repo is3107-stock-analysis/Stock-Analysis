@@ -17,6 +17,17 @@ username = os.getenv('USERNAME')
 password = os.getenv('PASSWORD')
 
 def insert_data(dataframe, db, schema, table):
+    '''
+    Function used by other methods for insertion of the 
+    resultant dataframes into Snowflake.
+
+    ----------------
+    Parameters
+    dataframe: Dataframe to be loaded into Snowflake.
+    db: Database in Snowflake which houses the required schema
+    schema: Schema in Snowflake which houses the required table
+    table: Table in Snowflake which houses the required data
+    '''
 
     ## insert into holdings table
     snowflake.connector.paramstyle= 'qmark'

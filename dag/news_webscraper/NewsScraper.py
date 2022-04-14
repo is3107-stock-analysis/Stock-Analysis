@@ -77,6 +77,10 @@ class NewsScraper:
       attached
       3. Open inverted commas also posed as an issue when loading strings into Snowflake
       4. Ellipses in certain scraped titles may pose as an issue for Sentiment Analysis
+
+      ----------------
+      Parameters
+      input_df_news: Dataframe of the scraped news data
     '''
     # Remove duplicates
     df_news = NewsScraper.removeDuplicates(input_df_news)
@@ -102,6 +106,10 @@ class NewsScraper:
     '''
     Removes duplicates in the title and link.
     Only the latest instance of the news article is kept and the rest are dropped.
+    
+    ----------------
+    Parameters
+    news_data: Dataframe of the scraped news data
     '''
     no_dupes_df = news_data.sort_values('datetime').drop_duplicates(subset = ['title','link'], keep='last')
     no_dupes_df.reset_index()
