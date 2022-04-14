@@ -18,7 +18,7 @@ password = os.getenv('PASSWORD')
 def query_table(db, schema, table, start_date, stop_date):
     '''
     Function used by other methods for querying of the 
-    necessary dataframes from Snowflake.
+    necessary tables from Snowflake and transform it into a dataframe.
 
     ----------------
     Parameters
