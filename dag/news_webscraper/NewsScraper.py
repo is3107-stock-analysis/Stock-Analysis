@@ -17,16 +17,6 @@ class NewsScraper:
 
     today = date.today().strftime("%m/%d/%Y")
 
-    three_months_ago_d = date.today() + relativedelta(months=-3)
-    three_months_ago = three_months_ago_d.strftime("%m/%d/%Y")
-    #three_months_ago_minus_one_day_d = three_months_ago_d + relativedelta(days=-1)
-    #three_months_ago_minus_one_day = three_months_ago_minus_one_day_d.strftime("%m/%d/%Y")
-
-    two_months_ago_d = date.today() + relativedelta(months=-2)
-    two_months_ago = two_months_ago_d.strftime("%m/%d/%Y")
-    two_months_ago_minus_one_day_d = two_months_ago_d + relativedelta(days=-1)
-    two_months_ago_minus_one_day = two_months_ago_minus_one_day_d.strftime("%m/%d/%Y")
-
     one_months_ago_d = date.today() + relativedelta(months=-1)
     one_months_ago = one_months_ago_d.strftime("%m/%d/%Y")
     one_months_ago_minus_one_day_d = one_months_ago_d + relativedelta(days=-1)
@@ -39,20 +29,13 @@ class NewsScraper:
     googlenews.set_lang('en')
 
     
-    holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", three_months_ago_d, date.today())
+    holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", one_months_ago_d, date.today())
     companies = list(holdings.COMPANY)
-    print("companies: " + str(companies))
     tickers = list(holdings.TICKER)
-    print("tickers: " + str(tickers))
+
 
     for i in range(len(companies)):
       df = NewsScraper.get_company_news(googlenews, df, one_months_ago_d, one_months_ago, today, companies[i], tickers[i])
-
-      # df = NewsScraper.get_company_news(googlenews, df, two_months_ago_d, two_months_ago, one_months_ago_minus_one_day, companies[i], tickers[i])
-      
-      # df = NewsScraper.get_company_news(googlenews, df, three_months_ago_d, three_months_ago, two_months_ago_minus_one_day, companies[i], tickers[i])
-    #print(df.dtypes)
-    #print(df.head())
 
     df_cleaned = NewsScraper.start_clean(df)
 

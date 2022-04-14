@@ -21,34 +21,29 @@ class SentimentAnalysis:
         headlines_df: dataframe of news headlines from these companies
         """
         today = date.today()
-        three_months_ago_d = date.today() + relativedelta(months=-3)
-        headlines_df = query_table("IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE", three_months_ago_d, today)
+        one_months_ago_d = date.today() + relativedelta(months=-1)
+        headlines_df = query_table("IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE", one_months_ago_d, today)
 
         model = SentimentIntensityAnalyzer()
         sentiment_predictions = SentimentAnalysis.getPredictions(model, headlines_df)
-        print('sentimentpred')
-        print(sentiment_predictions)
 
         optimized_df = pd.read_json(ti.xcom_pull(key="reweighting", task_ids=["suggest_reweight"])[0])
-        print('optimized df')
-        print(optimized_df)
 
         final_results_df = pd.merge(optimized_df, sentiment_predictions, on='Ticker')
 
         #add concordance column
         concordance = []
         for index, row in final_results_df.iterrows():
-            if row['REWEIGHTING'] > 0 and row['SENTIMENT'] == "negative":
+            if row['Adjustment'] > 0 and row['SENTIMENT'] == "negative":
                 concordance.append(False)
-            elif row['REWEIGHTING'] < 0 and row['SENTIMENT'] == "positive":
+            elif row['Adjustment'] < 0 and row['SENTIMENT'] == "positive":
                 concordance.append(False)
             else:
                 concordance.append(True)
         final_results_df['CONCORDANCE'] = concordance
         final_results_df['DATE'] = str(date.today())
+
         insert_data(final_results_df, "IS3107_RESULTS", "FINAL_OUTPUT", "REWEIGHTING")
-        print('final results df')
-        print(final_results_df)
 
 
     def getPredictions(model, headlines_df):

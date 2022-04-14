@@ -31,28 +31,17 @@ def get_data_for_multiple_stocks(ti):
 
     today = date.today().strftime("%m/%d/%Y")
 
-    three_months_ago_d = date.today() + relativedelta(months=-3)
-    three_months_ago = three_months_ago_d.strftime("%m/%d/%Y")
-    #three_months_ago_minus_one_day_d = three_months_ago_d + relativedelta(days=-1)
-    #three_months_ago_minus_one_day = three_months_ago_minus_one_day_d.strftime("%m/%d/%Y")
-
-    two_months_ago_d = date.today() + relativedelta(months=-2)
-    two_months_ago = two_months_ago_d.strftime("%m/%d/%Y")
-    two_months_ago_minus_one_day_d = two_months_ago_d + relativedelta(days=-1)
-    two_months_ago_minus_one_day = two_months_ago_minus_one_day_d.strftime("%m/%d/%Y")
-
     one_months_ago_d = date.today() + relativedelta(months=-1)
     one_months_ago = one_months_ago_d.strftime("%m/%d/%Y")
     one_months_ago_minus_one_day_d = one_months_ago_d + relativedelta(days=-1)
     one_months_ago_minus_one_day = one_months_ago_minus_one_day_d.strftime("%m/%d/%Y")
 
-    start_date = three_months_ago_d
+    start_date = one_months_ago_d
     end_date = date.today()
 
 
     stock_holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", start_date, end_date)
-    print("query ran!")
-    print(stock_holdings.head())
+
     tickers = list(stock_holdings.TICKER)
     # read in stock data
     s = DataReader(tickers[0], 'yahoo', start_date, end_date)[["Adj Close"]]
@@ -77,9 +66,6 @@ def get_data_for_multiple_stocks(ti):
 
     insert_data(stocks_pivoted, "IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_RETURNS")
 
-    ### Push into XCOM 
-    
-
     return stocks.to_json() 
 
 def df_table_converter(df_stocks):
@@ -91,8 +77,6 @@ def df_table_converter(df_stocks):
 
     #[date, ticker, return]
     ticker_row_info =[]
-    print("df_stocks xd")
-    print(df_stocks.head())
 
     for i in range(start, start+len(df_stocks)):
         date = df_stocks.loc[i,date_cols]

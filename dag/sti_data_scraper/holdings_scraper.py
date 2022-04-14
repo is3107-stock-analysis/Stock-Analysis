@@ -37,8 +37,6 @@ class HoldingsScraper:
         df =  pd.DataFrame({'COMPANY': companies, 'TICKER': tickers, 'TRUE_WEIGHT':true_weights, 'TOP_10_WEIGHT':top_10_weights})
         df['date'] = today
 
-        df = df.head(2)
-
         insert_data(df, "IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS" )
 
     @staticmethod

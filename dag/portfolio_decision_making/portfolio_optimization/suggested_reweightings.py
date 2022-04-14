@@ -15,9 +15,6 @@ def suggested_reweightings(ti):
     """
     today = date.today().strftime("%m/%d/%Y")
 
-    three_months_ago_d = date.today() + relativedelta(months=-3)
-    three_months_ago = three_months_ago_d.strftime("%m/%d/%Y")
-
     one_months_ago_d = date.today() + relativedelta(months=-1)
     one_months_ago = one_months_ago_d.strftime("%m/%d/%Y")
     one_months_ago_minus_one_day_d = one_months_ago_d + relativedelta(days=-1)
@@ -26,19 +23,15 @@ def suggested_reweightings(ti):
     optimized_df = pd.read_json(ti.xcom_pull(key="optimized_weights", task_ids=["optimize_portfolio"])[0])
 
     # load weights from stock holdings
-    stock_holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", three_months_ago_d, date.today())
+    stock_holdings = query_table("IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_HOLDINGS", one_months_ago_d, date.today())
     original_weights = list(stock_holdings.TOP10_WEIGHT)
     tickers = list(stock_holdings.TICKER)
-    print('tickers')
-    print(tickers)
     reweighting = pd.DataFrame(columns = ["Ticker", "Optimal_Weight","Adjustment"])
     reweighting["Ticker"]= tickers
     
     for i,ticker in enumerate(tickers):
         reweighting.loc[reweighting["Ticker"]==ticker,"Optimal_Weight"] = optimized_df.loc[optimized_df["Ticker"]==ticker, "Weight"] 
         reweighting.loc[reweighting["Ticker"]==ticker,"Adjustment"] = original_weights[i] -optimized_df.loc[optimized_df["Ticker"]==ticker, "Weight"] 
-        reweightin
-    print(reweighting)
 
     ### Push into XCOM 
     ti.xcom_push(key="reweighting", value=reweighting.to_json())

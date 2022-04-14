@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.models.baseoperator import chain
 from datetime import datetime
 from airflow.contrib.hooks.snowflake_hook import SnowflakeHook
 from airflow.contrib.operators.snowflake_operator import SnowflakeOperator
@@ -32,10 +33,10 @@ with DAG(dag_id="hello_world_dag",
         """
         Scrape & Load all required data
         """
-        # insert_holdings = PythonOperator(
-        #     task_id = "insert_holdings",
-        #     python_callable = HoldingsScraper.scrape_holdings
-        # )
+        insert_holdings = PythonOperator(
+            task_id = "insert_holdings",
+            python_callable = HoldingsScraper.scrape_holdings
+        )
 
 
         get_stocks = PythonOperator(
@@ -52,7 +53,6 @@ with DAG(dag_id="hello_world_dag",
         Portfolio Analysis Section
         """
 
-        #we minimize risk with while placing more emphasis on returns
         get_optimized_portfolio= PythonOperator(
         task_id="optimize_portfolio",
         python_callable=get_optimized_portfolio, 
@@ -64,17 +64,14 @@ with DAG(dag_id="hello_world_dag",
             python_callable=suggested_reweightings
         )
 
-        ##SA
         sentiment_analysis = PythonOperator(
             task_id = "sentiment_analysis",
             python_callable=SentimentAnalysis.get_sentiments
         )
 
-        #Get the optimized portfolio statistics
         get_comparison_statistics = PythonOperator(
             task_id="get_statistics", 
             python_callable=get_comparison_statistics
         )
 
-
-get_stocks>>insert_news>>get_optimized_portfolio>>get_adjustment>>sentiment_analysis>>get_comparison_statistics
+        chain(insert_holdings, [insert_news, get_stocks], get_optimized_portfolio, get_adjustment, sentiment_analysis,get_comparison_statistics)
