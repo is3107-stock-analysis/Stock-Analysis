@@ -12,6 +12,7 @@ from dateutil.relativedelta import relativedelta
 def suggested_reweightings(ti):
     """
     Compares and outputs the recommended adjusted weights
+    Pushes resulting reweighting dataframe using XComs
     """
     today = date.today().strftime("%m/%d/%Y")
 
