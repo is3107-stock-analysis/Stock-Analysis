@@ -58,8 +58,10 @@ def get_optimized_portfolio(ti, returns_scale = .0001, max_holding=0.5):
     #retrieve the weights of the optimized portfolio
     result = problem.solve()
     opt_weights = round(pd.Series(x.value, index = returns_df.columns), 2)
-    json_opt_weights = json.dumps(list(opt_weights))
+    optimized_weights=pd.DataFrame(opt_weights).reset_index()
+    optimized_weights.columns=["Ticker", 'Weight']
 
     # Push into XCOM
-    ti.xcom_push(key="optimized_weights", value=json_opt_weights)
-    return json_opt_weights
+    ti.xcom_push(key="optimized_weights", value=optimized_weights.to_json())
+    return optimized_weights.to_json()
+

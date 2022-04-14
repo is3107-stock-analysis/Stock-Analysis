@@ -34,10 +34,9 @@ def suggested_reweightings(ti):
     reweighting = pd.DataFrame(columns = ["Ticker", "Adjustment"])
     reweighting["Ticker"]= tickers
     
-    for ticker in tickers:
-        reweighting.loc[reweighting["Ticker"]==ticker,1] = (original_weights[original_weights["ticker"]==ticker].weight) -optimized_df[ticker] 
-
-    print("reweighting")
+    for i,ticker in enumerate(tickers):
+        reweighting.loc[reweighting["Ticker"]==ticker,"Adjustment"] = original_weights[i] -optimized_df.loc[optimized_df["Ticker"]==ticker, "Weight"] 
+        print("reweighting")
     print(reweighting)
 
     ### Push into XCOM 
