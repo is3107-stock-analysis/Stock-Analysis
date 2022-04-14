@@ -43,10 +43,10 @@ with DAG(dag_id="hello_world_dag",
         python_callable=get_data_for_multiple_stocks
         )
 
-        # insert_news = PythonOperator(
-        #     task_id = 'insert_news',
-        #     python_callable = NewsScraper.scrape_news
-        # )
+        insert_news = PythonOperator(
+            task_id = 'insert_news',
+            python_callable = NewsScraper.scrape_news
+        )
 
         """
         Portfolio Analysis Section
@@ -77,5 +77,4 @@ with DAG(dag_id="hello_world_dag",
         )
 
 
-
-get_stocks>>get_optimized_portfolio>>get_adjustment>>sentiment_analysis>>get_comparison_statistics
+get_stocks>>insert_news>>get_optimized_portfolio>>get_adjustment>>sentiment_analysis>>get_comparison_statistics

@@ -75,7 +75,7 @@ def get_data_for_multiple_stocks(ti):
 
     stocks_pivoted = df_table_converter(stocks.reset_index())
 
-    # insert_data(stocks_pivoted, "IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_RETURNS")
+    insert_data(stocks_pivoted, "IS3107_STOCKS_DATA", "STOCKS_DATA", "STOCK_RETURNS")
 
     ### Push into XCOM 
     

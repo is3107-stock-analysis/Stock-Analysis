@@ -45,13 +45,12 @@ class NewsScraper:
     tickers = list(holdings.TICKER)
     print("tickers: " + str(tickers))
 
-    # for i in range(len(companies)):
-    for i in range(2):
+    for i in range(len(companies)):
       df = NewsScraper.get_company_news(googlenews, df, one_months_ago_d, one_months_ago, today, companies[i], tickers[i])
 
-      df = NewsScraper.get_company_news(googlenews, df, two_months_ago_d, two_months_ago, one_months_ago_minus_one_day, companies[i], tickers[i])
+      # df = NewsScraper.get_company_news(googlenews, df, two_months_ago_d, two_months_ago, one_months_ago_minus_one_day, companies[i], tickers[i])
       
-      df = NewsScraper.get_company_news(googlenews, df, three_months_ago_d, three_months_ago, two_months_ago_minus_one_day, companies[i], tickers[i])
+      # df = NewsScraper.get_company_news(googlenews, df, three_months_ago_d, three_months_ago, two_months_ago_minus_one_day, companies[i], tickers[i])
     #print(df.dtypes)
     #print(df.head())
 
@@ -63,7 +62,7 @@ class NewsScraper:
     googlenews.clear()
     googlenews.set_time_range(start, end)
     googlenews.search(company)
-    sleep(15)
+    sleep(8)
 
     r = googlenews.results()
     results = pd.DataFrame(r) 
@@ -85,13 +84,13 @@ class NewsScraper:
     df_news['title'] = df_news['title'].apply(lambda x: contractions.fix(x))
 
     # Remove any open inverted commas 
-    df_news['title'] = df_news['title'].replace('"','')
+    df_news['title'] = df_news['title'].apply(lambda x: x.replace('"',''))
 
     # Remove any aprostrophe
-    df_news['title'] = df_news['title'].replace("'",'')
+    df_news['title'] = df_news['title'].apply(lambda x: x.replace("'",''))
 
     # Remove trailing ellipse
-    df_news['title'] = df_news['title'].replace('\.+','.',regex=True)
+    df_news['title'] = df_news['title'].apply(lambda x: x.replace('...',''))
     
     # Reset the index due to the dropping of duplicates
     df_news.reset_index()
