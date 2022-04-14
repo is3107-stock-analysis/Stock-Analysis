@@ -17,8 +17,8 @@ password = os.getenv('PASSWORD')
 #query_table("IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE", "2022-01-01", "2022-03-31")
 def query_table(db, schema, table, start_date, stop_date):
     '''
-    Function used by other methods for querying of the 
-    necessary tables from Snowflake and transform it into a dataframe.
+    Function used by other methods for querying of a table from Snowflake and 
+    transform it into a dataframe.
 
     ----------------
     Parameters
