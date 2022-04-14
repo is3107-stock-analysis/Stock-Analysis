@@ -13,7 +13,10 @@ class SentimentAnalysis:
 
     def get_sentiments(ti):
         """
-        Handles the sentiment analysis process
+        Handles the sentiment analysis and combines the results with results from suggested_reweighting. 
+        Queries Snowflake for News data to conduct sentiment analysis. 
+        Pulls suggested_reweighting dataframe from XComs.
+        Loads resultant merged results into REWEIGHTING table in Snowflake.
 
         Parameters
         ----------
@@ -46,6 +49,18 @@ class SentimentAnalysis:
         insert_data(final_results_df, "IS3107_RESULTS", "FINAL_OUTPUT", "REWEIGHTING")
 
 
+    """
+    Iterates through a given dataframe of news data and aggregates sentiments for each ticker in the dataframe
+
+    Parameters
+    ----------
+    model: model to be used to analyse sentiments
+    headlines_df: dataframe of news data to be analysed
+
+    Returns
+    -------
+    df : dataframe of tickers along with their aggregated sentiments across news pertaining to their company
+    """
     def getPredictions(model, headlines_df):
         sentiment_pred = []
         tickers = headlines_df['TICKER'].unique()

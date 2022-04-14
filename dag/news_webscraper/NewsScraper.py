@@ -14,10 +14,9 @@ from sql_helpers.sql_upload import insert_data
 class NewsScraper:
 
   def scrape_news():
-    '''
-    Scrapes the news from the current date up to one month ago.
-    Uses Google News.
-    '''
+    """
+    Begins the scraping process.
+    """
     today = date.today().strftime("%m/%d/%Y")
 
     one_months_ago_d = date.today() + relativedelta(months=-1)
@@ -44,13 +43,26 @@ class NewsScraper:
 
     insert_data(df_cleaned, "IS3107_NEWS_DATA", "NEWS_DATA", "NEWS_TABLE")
 
-  def get_company_news(googlenews, df, start_d, start, end, company, ticker):
-    '''
-    Starts a query for the news data with the specifed company name and ticker.
 
-    A timer to make the scraper sleep is used to ensure that the code does not 
-    get blocked by Google for sending too many requests at once. 
-    '''
+  def get_company_news(googlenews, df, start_d, start, end, company, ticker):
+    """
+    Scrapes GoogleNews for news about each stock in STI's top 10 holding list. Date range for the scrape is 
+    today till 1  month ago. 
+
+    Parameters
+    ----------
+    googlenews: GoogleNews object that is used to scrape Google's news
+    df: dataframe of previous scrape results
+    start_d: datetime object of the starting date to scrape news
+    start: string format of the starting date for the google search
+    end: string format of the ending date for the google search
+    company: company name to serach in Google
+    ticker: ticker symbol of company being searched in Google
+
+    Returns
+    -------
+    df : dataframe that combines new results from the Google scrape with the old results
+    """
     googlenews.clear()
     googlenews.set_time_range(start, end)
     googlenews.search(company)
@@ -69,7 +81,7 @@ class NewsScraper:
     return df
 
   def start_clean(input_df_news):
-    '''
+    """
     Part of the Transformation process to help clean scraped news data.
     Through Exploratory Data Analysis, we found a few key issues relating to the scraped news
       1. Duplicated titles and URLs were found in the scraped news
@@ -78,10 +90,14 @@ class NewsScraper:
       3. Open inverted commas also posed as an issue when loading strings into Snowflake
       4. Ellipses in certain scraped titles may pose as an issue for Sentiment Analysis
 
-      ----------------
-      Parameters
-      input_df_news: Dataframe of the scraped news data
-    '''
+    Parameters
+    ----------
+    input_df_news: Dataframe of the scraped news data
+
+    Returns
+    -------
+    df_news: DataFrame news_data with column 'title' cleaned up
+    """
     # Remove duplicates
     df_news = NewsScraper.removeDuplicates(input_df_news)
 
@@ -103,14 +119,18 @@ class NewsScraper:
     return df_news
 
   def removeDuplicates(news_data):
-    '''
+    """
     Removes duplicates in the title and link.
     Only the latest instance of the news article is kept and the rest are dropped.
     
-    ----------------
     Parameters
+    ----------
     news_data: Dataframe of the scraped news data
-    '''
+
+    Returns
+    -------
+    no_dupes_df: DataFrame news_data with duplicates removed
+    """
     no_dupes_df = news_data.sort_values('datetime').drop_duplicates(subset = ['title','link'], keep='last')
     no_dupes_df.reset_index()
     return no_dupes_df
