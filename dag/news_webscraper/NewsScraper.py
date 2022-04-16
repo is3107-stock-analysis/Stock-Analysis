@@ -24,8 +24,6 @@ class NewsScraper:
     one_months_ago_minus_one_day_d = one_months_ago_d + relativedelta(days=-1)
     one_months_ago_minus_one_day = one_months_ago_minus_one_day_d.strftime("%m/%d/%Y")
 
-    #quarter = str(date.today().year) + " Q" + str((date.today().month-1)//3 + 1)
-
     df = pd.DataFrame(columns=['title', 'datetime', 'link', 'company', 'ticker'])
     googlenews = GoogleNews()
     googlenews.set_lang('en')
